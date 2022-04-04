@@ -1,3 +1,7 @@
+<!-- 
+== Todo ==
+1. pagination on home page
+-->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -56,14 +60,25 @@
 ?>
 
 <?php 
+$results_per_page = 5;
+$page_num = $_GET['page'] or 1;
+
+if($page_num <= 0) {
+    $page_num = 1;
+}
+
+$offset = $page_num * $results_per_page;
+
 if (isset($_POST['btn'])) {
     $date = $_POST['idate'];
-    $q = "select * from grocerytb where Date='$date'";
+    $q = "SELECT * FROM grocerytb WHERE Date='$date' ORDER BY Date LIMIT $results_per_page OFFSET $offset";
     $query = mysqli_query($con, $q);
 } else {
-    $q = "select * from grocerytb";
+    $q = "SELECT * FROM grocerytb ORDER BY Date LIMIT $results_per_page OFFSET $offset";
     $query = mysqli_query($con, $q);
 }
+
+$num_results = $query->num_rows;
 ?>
 
 <body>
@@ -181,10 +196,38 @@ if ($qq['Item_status'] == 0) {
                 <a class='btn btn-warning' href="<?php echo $_SERVER['PHP_SELF'] ?>">Cancel</a>
             </div>
 
-
             <?php } ?>
 
         </form>
+
+        <?php echo '<p>Showing '.$results_per_page .' results</p>'?>
+
+        <nav aria-label="Page Navigation">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="btn page-link <?php if($page_num == 1){echo 'disabled';}?>"
+                        href="<?php echo $_SERVER['PHP_SELF'].'?page='.($page_num - 1) ?>" aria-label="Previous">
+                        <span aria-hidden="<?php echo ($page_num == 1 ? 'true' : 'false') ?>">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item"><a class="page-link" href=" <?php echo $_SERVER['PHP_SELF'].'?page=1' ?> ">1</a>
+                </li>
+
+                <li class="page-item"><a class="page-link" href=" <?php echo $_SERVER['PHP_SELF'].'?page=2' ?> ">2</a>
+                </li>
+
+                <li class="page-item"><a class="page-link" href=" <?php echo $_SERVER['PHP_SELF'].'?page=3' ?> ">3</a>
+                </li>
+
+                <a class="btn page-link <?php if($num_results < $results_per_page ){echo 'disabled';} ?>"
+                    href="<?php echo $_SERVER['PHP_SELF'].'?page='.($page_num + 1) ?>" aria-label="Next">
+                    <span aria-hidden="<?php
+                            echo ($num_results == $results_per_page ? 'true' : 'false')
+                        ?>">&raquo;</span>
+                </a>
+                </li>
+            </ul>
+        </nav>
 
         <h4><a href='test.php'>Add Test Items</a></h4>
 
